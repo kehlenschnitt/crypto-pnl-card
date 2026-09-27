@@ -10,10 +10,11 @@
             margin: 0;
             padding: 0;
             font-family: 'Courier New', Courier, monospace;
+            cursor: none !important;
         }
 
         body {
-            background-color: #030303;
+            background-color: #020202;
             color: #ffffff;
             display: flex;
             justify-content: center;
@@ -24,7 +25,21 @@
             position: relative;
         }
 
-        /* Ambient Glow & Grid Backdrop */
+        /* Custom Laser Cursor */
+        #custom-cursor {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            background: #00ff66;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            box-shadow: 0 0 15px #00ff66, 0 0 30px #00ff66;
+            transform: translate(-50%, -50%);
+            transition: transform 0.05s linear;
+        }
+
+        /* Background Grid */
         body::before {
             content: "";
             position: fixed;
@@ -32,13 +47,66 @@
             background: 
                 radial-gradient(circle at 50% 20%, rgba(0, 255, 102, 0.08), transparent 60%),
                 radial-gradient(circle at 80% 80%, rgba(255, 51, 102, 0.05), transparent 50%),
-                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%);
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.5) 50%);
             background-size: 100% 100%, 100% 100%, 100% 4px;
             z-index: 0;
             pointer-events: none;
         }
 
-        /* Main Dashboard Window */
+        /* Splash Join Screen */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: #020202;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .splash-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00ff66;
+            text-shadow: 0 0 15px rgba(0, 255, 102, 0.8);
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .splash-sub {
+            font-size: 12px;
+            color: #888888;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+        }
+
+        .join-btn {
+            background: rgba(0, 255, 102, 0.1);
+            border: 2px solid #00ff66;
+            color: #00ff66;
+            padding: 16px 36px;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .join-btn:hover {
+            background: #00ff66;
+            color: #000000;
+            box-shadow: 0 0 35px rgba(0, 255, 102, 0.9);
+            transform: scale(1.05);
+        }
+
+        /* Dashboard Wrapper */
         .dashboard {
             width: 100%;
             max-width: 460px;
@@ -47,20 +115,19 @@
             border: 1px solid rgba(0, 255, 102, 0.3);
             border-radius: 16px;
             padding: 24px;
-            box-shadow: 
-                0 0 20px rgba(0, 255, 102, 0.15),
-                inset 0 0 15px rgba(0, 255, 102, 0.05);
+            box-shadow: 0 0 25px rgba(0, 255, 102, 0.15);
             position: relative;
             z-index: 1;
-            animation: float 6s ease-in-out infinite;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
+        .dashboard.active {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        /* Glitch Header */
         .header {
             display: flex;
             justify-content: space-between;
@@ -84,7 +151,7 @@
             height: 8px;
             background-color: #00ff66;
             border-radius: 50%;
-            box-shadow: 0 0 12px #00ff66, 0 0 20px #00ff66;
+            box-shadow: 0 0 12px #00ff66;
             animation: pulse 1.2s infinite alternate;
         }
 
@@ -96,10 +163,8 @@
         .sys-id {
             font-size: 11px;
             color: #666666;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
         }
 
-        /* Audio Module */
         .audio-player {
             background: rgba(17, 17, 17, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -109,12 +174,6 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .audio-player:hover {
-            border-color: rgba(0, 255, 102, 0.4);
-            box-shadow: 0 0 12px rgba(0, 255, 102, 0.1);
         }
 
         .player-title {
@@ -131,7 +190,6 @@
             opacity: 0.8;
         }
 
-        /* Hero Profit Card */
         .main-card {
             background: linear-gradient(135deg, rgba(0, 255, 102, 0.08) 0%, rgba(5, 5, 5, 0.9) 100%);
             border: 1px solid #00ff66;
@@ -139,14 +197,7 @@
             padding: 22px;
             margin-bottom: 20px;
             position: relative;
-            overflow: hidden;
             box-shadow: 0 0 25px rgba(0, 255, 102, 0.25);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .main-card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 35px rgba(0, 255, 102, 0.4);
         }
 
         .label {
@@ -163,13 +214,7 @@
             color: #00ff66;
             letter-spacing: -1px;
             margin-bottom: 6px;
-            text-shadow: 0 0 15px rgba(0, 255, 102, 0.8), 0 0 30px rgba(0, 255, 102, 0.4);
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from { text-shadow: 0 0 10px rgba(0, 255, 102, 0.6); }
-            to { text-shadow: 0 0 22px rgba(0, 255, 102, 1), 0 0 35px rgba(0, 255, 102, 0.5); }
+            text-shadow: 0 0 15px rgba(0, 255, 102, 0.8);
         }
 
         .total-sub {
@@ -178,7 +223,6 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            text-shadow: 0 0 8px rgba(0, 255, 102, 0.5);
         }
 
         .badge {
@@ -189,7 +233,6 @@
             font-weight: bold;
             border-radius: 4px;
             box-shadow: 0 0 12px rgba(0, 255, 102, 0.8);
-            letter-spacing: 1px;
         }
 
         .section-title {
@@ -202,7 +245,6 @@
             justify-content: space-between;
         }
 
-        /* Coin List Items */
         .coin-list {
             display: flex;
             flex-direction: column;
@@ -219,33 +261,17 @@
             justify-content: space-between;
             align-items: center;
             transition: all 0.25s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .coin-row::before {
-            content: "";
-            position: absolute;
-            top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .coin-row:hover::before {
-            left: 100%;
         }
 
         .coin-row:hover {
             transform: translateX(4px);
-            border-color: rgba(255, 255, 255, 0.2);
-            background: rgba(25, 25, 25, 0.9);
+            border-color: rgba(0, 255, 102, 0.4);
         }
 
         .coin-ticker {
             font-size: 14px;
             font-weight: bold;
             color: #ffffff;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
         }
 
         .coin-meta {
@@ -268,7 +294,6 @@
         .coin-percent.win {
             font-size: 10px;
             color: #00ff66;
-            text-shadow: 0 0 5px rgba(0, 255, 102, 0.4);
         }
 
         .coin-amount.loss {
@@ -281,10 +306,8 @@
         .coin-percent.loss {
             font-size: 10px;
             color: #ff3366;
-            text-shadow: 0 0 5px rgba(255, 51, 102, 0.4);
         }
 
-        /* Analytics Grid */
         .analytics {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -297,11 +320,6 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
             padding: 14px;
             border-radius: 8px;
-            transition: border-color 0.3s ease;
-        }
-
-        .analytic-box:hover {
-            border-color: rgba(0, 255, 102, 0.3);
         }
 
         .analytic-val {
@@ -309,10 +327,8 @@
             font-weight: bold;
             color: #ffffff;
             margin-top: 4px;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
         }
 
-        /* Footer Bar */
         .footer {
             border-top: 1px dashed rgba(255, 255, 255, 0.1);
             padding-top: 16px;
@@ -339,7 +355,15 @@
 </head>
 <body>
 
-    <div class="dashboard">
+    <div id="custom-cursor"></div>
+
+    <div id="splash-screen">
+        <div class="splash-title">TERMINAL SYSTEM</div>
+        <div class="splash-sub">INITIALIZING MEME VAULT ACCESS</div>
+        <button class="join-btn" id="join-btn">ENTER TERMINAL</button>
+    </div>
+
+    <div class="dashboard" id="main-dashboard">
         <div class="header">
             <div class="status">
                 <div class="dot"></div>
@@ -349,8 +373,8 @@
         </div>
 
         <div class="audio-player">
-            <div class="player-title" id="player-status">AUDIO SYSTEM ONLINE</div>
-            <audio id="bg-music" controls loop autoplay>
+            <div class="player-title" id="player-status">NOW PLAYING: SANTIGOLD - DISPARATE YOUTH</div>
+            <audio id="bg-music" controls loop>
                 <source src="song.mp3" type="audio/mpeg">
                 Your browser does not support the audio element.
             </audio>
@@ -427,34 +451,30 @@
     </div>
 
     <script>
+        const cursor = document.getElementById('custom-cursor');
+        const splash = document.getElementById('splash-screen');
+        const dashboard = document.getElementById('main-dashboard');
+        const joinBtn = document.getElementById('join-btn');
         const audio = document.getElementById('bg-music');
-        const statusText = document.getElementById('player-status');
-        
-        audio.volume = 0.10;
 
-        function playAudio() {
+        // Custom Cursor Movement
+        window.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        // Splash Screen Join Click
+        joinBtn.addEventListener('click', () => {
+            splash.style.opacity = '0';
+            splash.style.visibility = 'hidden';
+            dashboard.classList.add('active');
+
+            // Play Music on Join
             audio.volume = 0.10;
-            audio.play().then(() => {
-                statusText.innerText = "NOW PLAYING: TWENTYTHREE - QUEEN ST";
-                removeListeners();
-            }).catch(() => {
-                // Autoplay vom Browser blockiert
+            audio.play().catch(() => {
+                console.log("Audio autoplay prevented");
             });
-        }
-
-        function removeListeners() {
-            window.removeEventListener('mousemove', playAudio);
-            window.removeEventListener('scroll', playAudio);
-            window.removeEventListener('keydown', playAudio);
-            window.removeEventListener('click', playAudio);
-        }
-
-        playAudio();
-
-        window.addEventListener('mousemove', playAudio);
-        window.addEventListener('scroll', playAudio);
-        window.addEventListener('keydown', playAudio);
-        window.addEventListener('click', playAudio);
+        });
     </script>
 
 </body>
