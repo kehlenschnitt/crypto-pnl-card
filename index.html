@@ -294,8 +294,8 @@
         </div>
 
         <div class="audio-player">
-            <div class="player-title" id="player-status">CLICK ANYWHERE TO PLAY MUSIC (25% VOL)</div>
-            <audio id="bg-music" controls loop>
+            <div class="player-title" id="player-status">AUDIO SYSTEM ONLINE</div>
+            <audio id="bg-music" controls loop autoplay>
                 <source src="song.mp3" type="audio/mpeg">
                 Your browser does not support the audio element.
             </audio>
@@ -326,8 +326,8 @@
                     <div class="coin-meta">SOLANA MEME</div>
                 </div>
                 <div class="coin-stats">
-                    <div class="coin-amount win">+$2,400.00</div>
-                    <div class="coin-percent win">+412.0%</div>
+                    <div class="coin-amount win">+$2,384.12</div>
+                    <div class="coin-percent win">+408.3%</div>
                 </div>
             </div>
 
@@ -337,8 +337,8 @@
                     <div class="coin-meta">SEASONAL COIN</div>
                 </div>
                 <div class="coin-stats">
-                    <div class="coin-amount win">+$1,063.00</div>
-                    <div class="coin-percent win">+184.2%</div>
+                    <div class="coin-amount win">+$1,073.38</div>
+                    <div class="coin-percent win">+186.0%</div>
                 </div>
             </div>
 
@@ -348,8 +348,8 @@
                     <div class="coin-meta">CLOSED POSITION</div>
                 </div>
                 <div class="coin-stats">
-                    <div class="coin-amount loss">-$300.00</div>
-                    <div class="coin-percent loss">-22.5%</div>
+                    <div class="coin-amount loss">-$294.50</div>
+                    <div class="coin-percent loss">-22.1%</div>
                 </div>
             </div>
         </div>
@@ -375,24 +375,31 @@
         const audio = document.getElementById('bg-music');
         const statusText = document.getElementById('player-status');
         
-        audio.volume = 0.25;
+        audio.volume = 0.10;
 
-        function startAudio() {
+        function playAudio() {
+            audio.volume = 0.10;
             audio.play().then(() => {
                 statusText.innerText = "NOW PLAYING: TWENTYTHREE - QUEEN ST";
-            }).catch(error => {
-                console.log("Autoplay blocked:", error);
+                removeListeners();
+            }).catch(() => {
+                // Autoplay vom Browser blockiert
             });
-            document.removeEventListener('click', startAudio);
         }
 
-        document.addEventListener('click', startAudio);
+        function removeListeners() {
+            window.removeEventListener('mousemove', playAudio);
+            window.removeEventListener('scroll', playAudio);
+            window.removeEventListener('keydown', playAudio);
+            window.removeEventListener('click', playAudio);
+        }
 
-        audio.play().then(() => {
-            statusText.innerText = "NOW PLAYING: TWENTYTHREE - QUEEN ST";
-        }).catch(() => {
-            // Autoplay Schutz vom Browser
-        });
+        playAudio();
+
+        window.addEventListener('mousemove', playAudio);
+        window.addEventListener('scroll', playAudio);
+        window.addEventListener('keydown', playAudio);
+        window.addEventListener('click', playAudio);
     </script>
 
 </body>
