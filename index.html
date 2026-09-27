@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TERMINAL // PNL TRACKER</title>
+    <title>TERMINAL // PNL VAULT v3.0</title>
     <style>
         * {
             box-sizing: border-box;
@@ -11,54 +11,76 @@
             padding: 0;
             font-family: 'Courier New', Courier, monospace;
             cursor: none !important;
+            user-select: none;
         }
 
         body {
-            background-color: #020202;
-            color: #ffffff;
+            background-color: #020203;
+            color: #00ff66;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 20px;
             overflow-x: hidden;
             position: relative;
+            padding: 20px;
         }
 
-        /* Custom Laser Cursor */
-        #custom-cursor {
+        /* Background Effects */
+        #particle-canvas {
             position: fixed;
-            width: 12px;
-            height: 12px;
-            background: #00ff66;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9999;
-            box-shadow: 0 0 15px #00ff66, 0 0 30px #00ff66;
-            transform: translate(-50%, -50%);
-            transition: transform 0.05s linear;
-        }
-
-        /* Background Grid */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: 
-                radial-gradient(circle at 50% 20%, rgba(0, 255, 102, 0.08), transparent 60%),
-                radial-gradient(circle at 80% 80%, rgba(255, 51, 102, 0.05), transparent 50%),
-                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.5) 50%);
-            background-size: 100% 100%, 100% 100%, 100% 4px;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             z-index: 0;
             pointer-events: none;
         }
 
-        /* Splash Join Screen */
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%),
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 6px 100%;
+            z-index: 998;
+            pointer-events: none;
+        }
+
+        /* Custom Cursor */
+        #cursor-dot {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: #00ff66;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px #00ff66, 0 0 20px #00ff66;
+        }
+
+        #cursor-ring {
+            position: fixed;
+            width: 28px;
+            height: 28px;
+            border: 1px solid rgba(0, 255, 102, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.15s ease, height 0.15s ease, border-color 0.15s ease;
+        }
+
+        /* Splash Screen */
         #splash-screen {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
+            width: 100vw;
             height: 100vh;
             background: #020202;
             z-index: 1000;
@@ -66,84 +88,85 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
+            gap: 20px;
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
         }
 
         .splash-title {
-            font-size: 28px;
-            font-weight: bold;
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: 6px;
             color: #00ff66;
-            text-shadow: 0 0 15px rgba(0, 255, 102, 0.8);
-            letter-spacing: 4px;
-            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 255, 102, 0.8);
             text-align: center;
         }
 
         .splash-sub {
-            font-size: 12px;
+            font-size: 11px;
             color: #888888;
-            letter-spacing: 2px;
-            margin-bottom: 30px;
+            letter-spacing: 3px;
         }
 
         .join-btn {
-            background: rgba(0, 255, 102, 0.1);
-            border: 2px solid #00ff66;
+            background: rgba(0, 255, 102, 0.05);
+            border: 1px solid #00ff66;
             color: #00ff66;
-            padding: 16px 36px;
-            font-size: 14px;
+            padding: 16px 40px;
+            font-size: 13px;
             font-weight: bold;
-            letter-spacing: 3px;
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
+            letter-spacing: 4px;
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.3);
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         .join-btn:hover {
             background: #00ff66;
             color: #000000;
-            box-shadow: 0 0 35px rgba(0, 255, 102, 0.9);
+            box-shadow: 0 0 40px rgba(0, 255, 102, 0.9);
             transform: scale(1.05);
         }
 
-        /* Dashboard Wrapper */
-        .dashboard {
+        /* Main App Container */
+        .app-container {
             width: 100%;
-            max-width: 460px;
-            background: rgba(10, 10, 10, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(0, 255, 102, 0.3);
+            max-width: 480px;
+            background: rgba(8, 8, 10, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 255, 102, 0.25);
             border-radius: 16px;
             padding: 24px;
-            box-shadow: 0 0 25px rgba(0, 255, 102, 0.15);
-            position: relative;
-            z-index: 1;
+            box-shadow: 0 0 35px rgba(0, 255, 102, 0.12);
+            z-index: 10;
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(20px) scale(0.98);
             transition: opacity 0.8s ease, transform 0.8s ease;
         }
 
-        .dashboard.active {
+        .app-container.active {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
         }
 
+        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 16px;
-            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 14px;
+            margin-bottom: 18px;
         }
 
         .status {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 11px;
+            font-size: 10px;
             color: #aaaaaa;
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
         }
 
         .dot {
@@ -151,8 +174,8 @@
             height: 8px;
             background-color: #00ff66;
             border-radius: 50%;
-            box-shadow: 0 0 12px #00ff66;
-            animation: pulse 1.2s infinite alternate;
+            box-shadow: 0 0 10px #00ff66;
+            animation: pulse 1.5s infinite alternate;
         }
 
         @keyframes pulse {
@@ -161,55 +184,79 @@
         }
 
         .sys-id {
-            font-size: 11px;
-            color: #666666;
+            font-size: 10px;
+            color: #555555;
+            letter-spacing: 1px;
         }
 
-        .audio-player {
-            background: rgba(17, 17, 17, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        /* Audio Module */
+        .audio-card {
+            background: rgba(15, 15, 18, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 20px;
+            padding: 12px 14px;
+            margin-bottom: 18px;
             display: flex;
             flex-direction: column;
             gap: 8px;
+        }
+
+        .audio-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .player-title {
             font-size: 10px;
             color: #00ff66;
             letter-spacing: 1px;
-            text-shadow: 0 0 8px rgba(0, 255, 102, 0.6);
+            text-shadow: 0 0 8px rgba(0, 255, 102, 0.5);
+        }
+
+        .eq-bar-container {
+            display: flex;
+            gap: 3px;
+            height: 12px;
+            align-items: flex-end;
+        }
+
+        .eq-bar {
+            width: 3px;
+            background: #00ff66;
+            height: 20%;
+            border-radius: 1px;
+            transition: height 0.1s ease;
         }
 
         audio {
             width: 100%;
-            height: 30px;
+            height: 28px;
             filter: invert(100%) hue-rotate(90deg);
             opacity: 0.8;
         }
 
+        /* Hero Profit Card */
         .main-card {
-            background: linear-gradient(135deg, rgba(0, 255, 102, 0.08) 0%, rgba(5, 5, 5, 0.9) 100%);
-            border: 1px solid #00ff66;
+            background: linear-gradient(135deg, rgba(0, 255, 102, 0.08) 0%, rgba(5, 5, 8, 0.95) 100%);
+            border: 1px solid rgba(0, 255, 102, 0.6);
             border-radius: 12px;
-            padding: 22px;
-            margin-bottom: 20px;
+            padding: 20px;
+            margin-bottom: 18px;
+            box-shadow: 0 0 25px rgba(0, 255, 102, 0.15);
             position: relative;
-            box-shadow: 0 0 25px rgba(0, 255, 102, 0.25);
         }
 
         .label {
             font-size: 10px;
-            color: #888888;
+            color: #777777;
             text-transform: uppercase;
             letter-spacing: 2px;
             margin-bottom: 6px;
         }
 
         .total-value {
-            font-size: 38px;
+            font-size: 36px;
             font-weight: 900;
             color: #00ff66;
             letter-spacing: -1px;
@@ -218,7 +265,7 @@
         }
 
         .total-sub {
-            font-size: 12px;
+            font-size: 11px;
             color: #00ff66;
             display: flex;
             align-items: center;
@@ -228,55 +275,70 @@
         .badge {
             background: #00ff66;
             color: #000000;
-            padding: 3px 8px;
-            font-size: 10px;
+            padding: 2px 6px;
+            font-size: 9px;
             font-weight: bold;
-            border-radius: 4px;
-            box-shadow: 0 0 12px rgba(0, 255, 102, 0.8);
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.6);
+        }
+
+        /* Chart Canvas */
+        .chart-container {
+            width: 100%;
+            height: 90px;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        #pnl-chart {
+            width: 100%;
+            height: 100%;
         }
 
         .section-title {
-            font-size: 11px;
-            color: #777777;
+            font-size: 10px;
+            color: #666666;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
             margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
         }
 
+        /* Coin List */
         .coin-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 18px;
         }
 
         .coin-row {
-            background: rgba(17, 17, 17, 0.7);
+            background: rgba(14, 14, 18, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 8px;
-            padding: 14px 18px;
+            padding: 12px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.25s ease;
+            transition: all 0.2s ease;
         }
 
         .coin-row:hover {
             transform: translateX(4px);
             border-color: rgba(0, 255, 102, 0.4);
+            background: rgba(20, 20, 26, 0.9);
         }
 
         .coin-ticker {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             color: #ffffff;
         }
 
         .coin-meta {
-            font-size: 10px;
-            color: #666666;
+            font-size: 9px;
+            color: #555555;
             margin-top: 2px;
         }
 
@@ -285,95 +347,98 @@
         }
 
         .coin-amount.win {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             color: #00ff66;
-            text-shadow: 0 0 10px rgba(0, 255, 102, 0.7);
+            text-shadow: 0 0 8px rgba(0, 255, 102, 0.6);
         }
 
         .coin-percent.win {
-            font-size: 10px;
+            font-size: 9px;
             color: #00ff66;
         }
 
         .coin-amount.loss {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             color: #ff3366;
-            text-shadow: 0 0 10px rgba(255, 51, 102, 0.7);
+            text-shadow: 0 0 8px rgba(255, 51, 102, 0.6);
         }
 
         .coin-percent.loss {
-            font-size: 10px;
+            font-size: 9px;
             color: #ff3366;
         }
 
+        /* Analytics Grid */
         .analytics {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 18px;
         }
 
         .analytic-box {
-            background: rgba(14, 14, 14, 0.7);
+            background: rgba(12, 12, 15, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 14px;
+            padding: 12px;
             border-radius: 8px;
         }
 
         .analytic-val {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             color: #ffffff;
             margin-top: 4px;
         }
 
+        /* Footer */
         .footer {
-            border-top: 1px dashed rgba(255, 255, 255, 0.1);
-            padding-top: 16px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.08);
+            padding-top: 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 10px;
-            color: #555555;
+            font-size: 9px;
+            color: #444444;
         }
-
-        .bar-container {
-            width: 100%;
-            height: 4px;
-            background: #111111;
-            border-radius: 2px;
-            margin-top: 14px;
-            overflow: hidden;
-            display: flex;
-        }
-
-        .bar-stonk { width: 69%; background: #00ff66; box-shadow: 0 0 10px #00ff66; }
-        .bar-hold { width: 31%; background: #ff3366; box-shadow: 0 0 10px #ff3366; }
     </style>
 </head>
 <body>
 
-    <div id="custom-cursor"></div>
+    <canvas id="particle-canvas"></canvas>
+    <div class="crt-overlay"></div>
 
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
+
+    <!-- Splash Screen -->
     <div id="splash-screen">
-        <div class="splash-title">TERMINAL SYSTEM</div>
-        <div class="splash-sub">INITIALIZING MEME VAULT ACCESS</div>
-        <button class="join-btn" id="join-btn">ENTER TERMINAL</button>
+        <div class="splash-title">TERMINAL VAULT</div>
+        <div class="splash-sub">SECURE SYSTEM ACCESS // v3.0</div>
+        <button class="join-btn" id="join-btn">INITIALIZE</button>
     </div>
 
-    <div class="dashboard" id="main-dashboard">
+    <!-- Main Dashboard -->
+    <div class="app-container" id="main-dashboard">
         <div class="header">
             <div class="status">
                 <div class="dot"></div>
-                SYSTEM ONLINE
+                LIVE FEED ONLINE
             </div>
-            <div class="sys-id">PORTFOLIO // v2.0</div>
+            <div class="sys-id">SYSTEM // 0x99A</div>
         </div>
 
-        <div class="audio-player">
-            <div class="player-title" id="player-status">NOW PLAYING: SANTIGOLD - DISPARATE YOUTH</div>
+        <div class="audio-card">
+            <div class="audio-info">
+                <div class="player-title" id="player-status">TRACK: SANTIGOLD - DISPARATE YOUTH</div>
+                <div class="eq-bar-container">
+                    <div class="eq-bar" id="eq1"></div>
+                    <div class="eq-bar" id="eq2"></div>
+                    <div class="eq-bar" id="eq3"></div>
+                    <div class="eq-bar" id="eq4"></div>
+                </div>
+            </div>
             <audio id="bg-music" controls loop>
                 <source src="song.mp3" type="audio/mpeg">
                 Your browser does not support the audio element.
@@ -382,25 +447,24 @@
 
         <div class="main-card">
             <div class="label">NET PROFIT / LOSS</div>
-            <div class="total-value">+$3,163.00</div>
+            <div class="total-value" id="total-val">+$3,163.00</div>
             <div class="total-sub">
                 <span class="badge">WINNING</span>
                 <span>ROI: +248.5%</span>
             </div>
-            <div class="bar-container">
-                <div class="bar-stonk"></div>
-                <div class="bar-hold"></div>
+            <div class="chart-container">
+                <canvas id="pnl-chart"></canvas>
             </div>
         </div>
 
         <div class="section-title">
-            <span>ASSET ALLOCATION</span>
-            <span>PROFIT</span>
+            <span>HOLDINGS</span>
+            <span>REALIZED PNL</span>
         </div>
 
         <div class="coin-list">
             <div class="coin-row">
-                <div class="coin-info">
+                <div>
                     <div class="coin-ticker">STONK</div>
                     <div class="coin-meta">SOLANA MEME</div>
                 </div>
@@ -411,9 +475,9 @@
             </div>
 
             <div class="coin-row">
-                <div class="coin-info">
+                <div>
                     <div class="coin-ticker">HOLDOWEEN</div>
-                    <div class="coin-meta">SEASONAL COIN</div>
+                    <div class="coin-meta">SEASONAL TOKEN</div>
                 </div>
                 <div class="coin-stats">
                     <div class="coin-amount win">+$1,073.38</div>
@@ -422,7 +486,7 @@
             </div>
 
             <div class="coin-row">
-                <div class="coin-info">
+                <div>
                     <div class="coin-ticker">DOGWIFHAT</div>
                     <div class="coin-meta">CLOSED POSITION</div>
                 </div>
@@ -445,34 +509,136 @@
         </div>
 
         <div class="footer">
-            <span>KEHLENSCHNITT // MEME VAULT</span>
-            <span>LIVE DATA</span>
+            <span>MEME VAULT // TERMINAL</span>
+            <span>CONNECTED TO MAINNET</span>
         </div>
     </div>
 
     <script>
-        const cursor = document.getElementById('custom-cursor');
+        // Custom Cursor Logic
+        const dot = document.getElementById('cursor-dot');
+        const ring = document.getElementById('cursor-ring');
+
+        window.addEventListener('mousemove', (e) => {
+            dot.style.left = e.clientX + 'px';
+            dot.style.top = e.clientY + 'px';
+            
+            ring.animate({
+                left: e.clientX + 'px',
+                top: e.clientY + 'px'
+            }, { duration: 400, fill: "forwards" });
+        });
+
+        // Background Particles Canvas
+        const pCanvas = document.getElementById('particle-canvas');
+        const pCtx = pCanvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            pCanvas.width = window.innerWidth;
+            pCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        for (let i = 0; i < 40; i++) {
+            particles.push({
+                x: Math.random() * pCanvas.width,
+                y: Math.random() * pCanvas.height,
+                size: Math.random() * 2 + 1,
+                speedY: -(Math.random() * 0.5 + 0.2),
+                opacity: Math.random() * 0.5 + 0.2
+            });
+        }
+
+        function animateParticles() {
+            pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+            particles.forEach(p => {
+                p.y += p.speedY;
+                if (p.y < 0) p.y = pCanvas.height;
+                pCtx.fillStyle = `rgba(0, 255, 102, ${p.opacity})`;
+                pCtx.beginPath();
+                pCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                pCtx.fill();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // Chart Canvas Logic
+        const chartCanvas = document.getElementById('pnl-chart');
+        const chartCtx = chartCanvas.getContext('2d');
+
+        function drawChart() {
+            chartCanvas.width = chartCanvas.offsetWidth;
+            chartCanvas.height = chartCanvas.offsetHeight;
+
+            const points = [10, 25, 18, 45, 30, 65, 55, 85, 80, 100];
+            const step = chartCanvas.width / (points.length - 1);
+
+            chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+
+            // Glow Fill
+            const grad = chartCtx.createLinearGradient(0, 0, 0, chartCanvas.height);
+            grad.addColorStop(0, 'rgba(0, 255, 102, 0.35)');
+            grad.addColorStop(1, 'rgba(0, 255, 102, 0.0)');
+
+            chartCtx.beginPath();
+            chartCtx.moveTo(0, chartCanvas.height);
+            points.forEach((pt, i) => {
+                const x = i * step;
+                const y = chartCanvas.height - (pt / 100) * chartCanvas.height;
+                chartCtx.lineTo(x, y);
+            });
+            chartCtx.lineTo(chartCanvas.width, chartCanvas.height);
+            chartCtx.fillStyle = grad;
+            chartCtx.fill();
+
+            // Line
+            chartCtx.beginPath();
+            points.forEach((pt, i) => {
+                const x = i * step;
+                const y = chartCanvas.height - (pt / 100) * chartCanvas.height;
+                if (i === 0) chartCtx.moveTo(x, y);
+                else chartCtx.lineTo(x, y);
+            });
+            chartCtx.strokeStyle = '#00ff66';
+            chartCtx.lineWidth = 2;
+            chartCtx.shadowColor = '#00ff66';
+            chartCtx.shadowBlur = 10;
+            chartCtx.stroke();
+        }
+
+        // Equalizer Animation
+        const eqBars = [
+            document.getElementById('eq1'),
+            document.getElementById('eq2'),
+            document.getElementById('eq3'),
+            document.getElementById('eq4')
+        ];
+
+        setInterval(() => {
+            eqBars.forEach(bar => {
+                const h = Math.floor(Math.random() * 80) + 20;
+                bar.style.height = h + '%';
+            });
+        }, 150);
+
+        // Splash Screen & Audio Start
         const splash = document.getElementById('splash-screen');
         const dashboard = document.getElementById('main-dashboard');
         const joinBtn = document.getElementById('join-btn');
         const audio = document.getElementById('bg-music');
 
-        // Custom Cursor Movement
-        window.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-        });
-
-        // Splash Screen Join Click
         joinBtn.addEventListener('click', () => {
             splash.style.opacity = '0';
             splash.style.visibility = 'hidden';
             dashboard.classList.add('active');
+            drawChart();
 
-            // Play Music on Join
             audio.volume = 0.10;
             audio.play().catch(() => {
-                console.log("Audio autoplay prevented");
+                console.log("Audio autoplay error");
             });
         });
     </script>
